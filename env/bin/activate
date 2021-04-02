@@ -74,3 +74,8 @@ fi
 if [ -n "${BASH:-}" -o -n "${ZSH_VERSION:-}" ] ; then
     hash -r
 fi
+
+export reddit_script="pe-KlvnzP4NbfA"
+export reddit_secret="f3uFOFnA7fvqQrvdqSoparSSuDPNmw"
+export reddit_username="not_crypt_bot"
+export reddit_password="9g4Xke41r"

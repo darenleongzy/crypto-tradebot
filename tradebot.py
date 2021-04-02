@@ -4,16 +4,62 @@ from binance.client import Client
 # from twisted.internet import reactor
 from binance.exceptions import BinanceAPIException, BinanceOrderException
 import time
+import requests
 
-api_key = os.environ.get('demo_binance_api')
-api_secret = os.environ.get('demo_binance_secret')
+# api_key = os.environ.get('demo_binance_api')
+# api_secret = os.environ.get('demo_binance_secret')
 
-client = Client(api_key, api_secret)
-client.API_URL = 'https://testnet.binance.vision/api'
+# print(api_secret)
+# client = Client(api_key, api_secret)
+# client.API_URL = 'https://testnet.binance.vision/api'
 
-global btc_price
 #init
 def main():
+    init_reddit()
+    # start_binance()
+
+def init_reddit():
+    # note that CLIENT_ID refers to 'personal use script' and SECRET_TOKEN to 'token'
+    auth = requests.auth.HTTPBasicAuth(os.environ.get('reddit_script'), os.environ.get('reddit_secret'))
+
+    # here we pass our login method (password), username, and password
+    data = {'grant_type': 'password',
+            'username': os.environ.get('reddit_username'),
+            'password': os.environ.get('reddit_password')}
+
+    # setup our header info, which gives reddit a brief description of our app
+    headers = {'User-Agent': 'crypto-sentiments'}
+
+    # send our request for an OAuth token
+    res = requests.post('https://www.reddit.com/api/v1/access_token',
+                        auth=auth, data=data, headers=headers)
+
+
+    # convert response to JSON and pull access_token value
+    TOKEN = res.json()['access_token']
+    # add authorization to our headers dictionary
+    headers = {**headers, **{'Authorization': f"bearer {TOKEN}"}}
+
+    # while the token is valid (~2 hours) we just add headers=headers to our requests
+    requests.get('https://oauth.reddit.com/api/v1/me', headers=headers)
+    get_reddit_post(headers)
+
+def get_reddit_post(headers):
+    res = requests.get("https://oauth.reddit.com/r/cryptocurrency/hot",
+                   headers=headers)
+    cryptos = ['bitcoin', 'ethereum', 'btc', 'eth']
+    crypto_headlines = {'bitcoin':[],'btc':[],'ethereum':[],'eth':[] }
+    # print(res.json()) 
+    for post in res.json()['data']['children']:
+        # print(post['data']['title'])
+        headline_words =  post['data']['title'].lower().split(' ')
+        for word in headline_words:
+            if word in cryptos:
+                crypto_headlines[word].append(post['data']['title'])
+    
+    print(crypto_headlines)
+
+def start_binance():
     # print(client.get_account())
     # print(client.get_asset_balance(asset='BTC'))
     get_coin_price('BTCUSDT')
@@ -46,4 +92,7 @@ def buy_coin(coin_symbol, buy_qty):
             print('order',order['orderId'], 'status:', order['status'] )
         print()
         time.sleep(10)
-main()
+
+if __name__ == "__main__":
+    main()
+    
