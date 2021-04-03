@@ -1,4 +1,5 @@
 {
     "python.pythonPath": "/Users/daren/Documents/git_repo/crypto-tradebot/env/bin/python3",
-    "git.ignoreLimitWarning": true
+    "git.ignoreLimitWarning": true,
+    "workbench.sideBar.location": "right"
 }
