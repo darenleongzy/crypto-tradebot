@@ -42,7 +42,7 @@ def main():
         analyze_sentiments(client, crypto_content, crypto_sentiments)
         print_crypto_sentiments(crypto_sentiments)
         print('\n[Completed round at {}]\n'.format(datetime.now()))
-        time.sleep(2*60*60)
+        time.sleep(60*60)
 
     # start_binance()
 
@@ -132,8 +132,7 @@ def get_suitable_reddit_post(current_ts, headers):
     list_post = []
     end_post = ''
     curr_post = ''
-    print('oldest post', res.json()
-          ['data']['children'][0]['data']['created_utc'])
+
     while not end_post:
         # print('oldest post', (int(current_ts) - int(res.json()
         #                                             ['data']['children'][0]['data']['created_utc']))/60)
@@ -142,10 +141,8 @@ def get_suitable_reddit_post(current_ts, headers):
             curr_post = post['kind'] + '_' + post['data']['id']
             if int(current_ts) - int(post['data']['created_utc']) >= 60*60:
                 list_post.append(post)
-                print(post['data']['title'])
                 if (int(current_ts) - int(post['data']['created_utc'])) >= 2*60*60:
                     end_post = curr_post
-                    print('found_end')
                     break
         if not end_post:
             res = requests.get("https://oauth.reddit.com/r/cryptocurrency/new",
@@ -178,7 +175,7 @@ def analyze_sentiments(client, crypto_content, crypto_sentiments):
                     annotations = client.analyze_sentiment(
                         request={'document': document})
                 score = annotations.document_sentiment.score
-                # print_sentiment_result(annotations, post['votes'])
+                print_sentiment_result(annotations, post['votes'])
                 final_crypto_sentiment += (score *
                                            post['votes'] / val['total_votes'])
             # print("Final Sentiment Score", final_crypto_sentiment)
@@ -192,10 +189,10 @@ def print_sentiment_result(annotations, votes):
 
     for index, sentence in enumerate(annotations.sentences):
         sentence_sentiment = sentence.sentiment.score
-        # print(
-        #     "Sentence {} has a sentiment score of {}".format(
-        #         index, sentence_sentiment)
-        # )
+        print(
+            "Sentence {} has a sentiment score of {}".format(
+                index, sentence_sentiment)
+        )
 
     print(
         "Doc Sentiment: score of {} with {} votes".format(
